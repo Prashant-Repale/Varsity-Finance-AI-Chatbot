@@ -905,8 +905,19 @@ components.html(
     """
     <script>
     (() => {
-        const doc = window.parent.document;
+        const STORAGE_KEY = 'vf_user_id';
+        const url = new URL(window.parent.location.href);
+        const inUrl = url.searchParams.get('user_id');
+        const inStorage = localStorage.getItem(STORAGE_KEY);
 
+        if (inUrl) {
+            localStorage.setItem(STORAGE_KEY, inUrl);
+        } else if (inStorage) {
+            url.searchParams.set('user_id', inStorage);
+            window.parent.location.replace(url.toString());
+        }
+
+        const doc = window.parent.document;
         // ── Custom sidebar toggle button ──────────────────────────────────────
         if (window.parent.__vfSidebarInterval) {
             window.parent.clearInterval(window.parent.__vfSidebarInterval);
@@ -1102,12 +1113,32 @@ def _clean_id(value: str | None, fallback: str) -> str:
     value = (value or "").strip()
     return value if value else fallback
 
+# def init_ids() -> None:
+#     if "user_id" not in st.session_state:
+#         st.session_state.user_id = _clean_id(_query_value("user_id"), _new_user_id())
+#     if "thread_id" not in st.session_state:
+#         st.session_state.thread_id = _clean_id(_query_value("thread_id"), _new_thread_id())
+#     sync_query_params()
+
 def init_ids() -> None:
     if "user_id" not in st.session_state:
-        st.session_state.user_id = _clean_id(_query_value("user_id"), _new_user_id())
+        from_url = _clean_id(_query_value("user_id"), "")
+        if from_url:
+            # Returning user — restore from URL
+            st.session_state.user_id = from_url
+            st.session_state.setup_done = True
+        else:
+            # Brand new visitor — needs to enter name
+            st.session_state.user_id = ""
+            st.session_state.setup_done = False
+
     if "thread_id" not in st.session_state:
-        st.session_state.thread_id = _clean_id(_query_value("thread_id"), _new_thread_id())
-    sync_query_params()
+        st.session_state.thread_id = _clean_id(
+            _query_value("thread_id"), _new_thread_id()
+        )
+
+    if st.session_state.get("setup_done", False):
+        sync_query_params()
 
 def sync_query_params() -> None:
     st.query_params["user_id"]   = st.session_state.user_id
@@ -1307,7 +1338,39 @@ chatbot        = runtime["chatbot"] if runtime else None
 current_config = config_for()
 thread_messages = load_thread_messages(chatbot, current_config) if chatbot else []
 
+# ── WELCOME GATE — shown only on first ever visit ──
+if not st.session_state.get("setup_done", False):
+    st.markdown(
+        """
+        <div style="display:flex;flex-direction:column;align-items:center;
+        justify-content:center;min-height:80vh;text-align:center;padding:20px;">
+            <div style="font-size:40px;margin-bottom:16px;">📈</div>
+            <div style="font-size:24px;font-weight:700;color:#ececec;
+            margin-bottom:8px;">Welcome to Varsity Finance AI</div>
+            <div style="font-size:14px;color:#8e8e8e;margin-bottom:32px;">
+            Enter a username to start. Use the same name to resume your chats later.
+            </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
+    col1, col2, col3 = st.columns([1, 2, 1])
+    with col2:
+        username = st.text_input(
+            "Choose your username",
+            placeholder="e.g. prashant",
+            key="welcome_input",
+        )
+        if st.button("Start Chatting →", use_container_width=True):
+            if username.strip():
+                st.session_state.user_id = username.strip().lower()
+                st.session_state.setup_done = True
+                sync_query_params()
+                st.rerun()
+            else:
+                st.error("Please enter a username")
+    st.stop()   # ← blocks rest of app from rendering until name is set
 # ──────────────────────────────────────────────────────────────────────────────
 # SIDEBAR
 # ──────────────────────────────────────────────────────────────────────────────
