@@ -115,8 +115,8 @@ def rag_tool(query: str) -> dict:
 
     if not relevance_check or relevance_check[0][1] < 0.5:
         return {
-            "status": "IRRELEVANT",
-            "instruction": "No docs found in knowledge base. Call web_search instead.",
+            "status": "find out the domain of the question is it finance or not finance ",
+            "instruction": "No docs found in knowledge base.if the question is of finance domain and you dont have relavant information from this tool then send it to web search tool only if it is finance doman , if question is out of the finance doman Use NO tools say polietly Call web_search instead.",
             "context": [],
         }
     context = [doc.page_content for doc in results]
