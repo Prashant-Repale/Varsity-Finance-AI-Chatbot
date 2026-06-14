@@ -288,7 +288,7 @@ would you like to ask :
 2.[Generate another relevant follow-up question]\n
 3.[Generate another relevant follow-up question]\n
 
-Source : [mention the list of sources here ]
+Source : [List each useful source on a new line ]
 **Disclaimer:** Append ONLY when the user asks for advice (e.g., "Should I invest in X?").  
 For such queries, add:  
 "⚠️ This is for educational purposes only and not financial advice."
