@@ -284,9 +284,9 @@ For time-sensitive queries, include "2026" in `web_search` queries.
 You MUST ALWAYS end your response EXACTLY in this format:
 
 would you like to ask :
-1.[Generate a relevant follow-up question based on the user's query]
-2.[Generate another relevant follow-up question]
-3.[Generate another relevant follow-up question]
+1.[Generate a relevant follow-up question based on the user's query]\n
+2.[Generate another relevant follow-up question]\n
+3.[Generate another relevant follow-up question]\n
 
 Source : [mention the list of sources here ]
 **Disclaimer:** Append ONLY when the user asks for advice (e.g., "Should I invest in X?").  
