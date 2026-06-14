@@ -111,7 +111,9 @@ def rag_tool(query: str) -> dict:
     """
     
     results = retriever.invoke(query)
-    if not results:
+    relevance_check = db.similarity_search_with_relevance_scores(query, k=1)
+
+    if not relevance_check or relevance_check[0][1] < 0.2:
         return {
             "status": "IRRELEVANT",
             "instruction": "No docs found in knowledge base. Call web_search instead.",
