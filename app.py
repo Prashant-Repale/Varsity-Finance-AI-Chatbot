@@ -954,6 +954,24 @@ st.markdown(
     [data-testid="stChatInput"] textarea::placeholder {
         color: #888 !important;
     }
+    /* SEND BUTTON FIX */
+    [data-testid="stChatInput"] button {
+        background-color: #10a37f !important;   /* accent color */
+        border: none !important;
+        border-radius: 8px !important;
+    }
+
+    /* Icon inside button */
+    [data-testid="stChatInput"] button svg,
+    [data-testid="stChatInput"] button svg * {
+        fill: white !important;
+        stroke: white !important;
+    }
+
+    /* Hover effect */
+    [data-testid="stChatInput"] button:hover {
+        background-color: #0d7a60 !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
