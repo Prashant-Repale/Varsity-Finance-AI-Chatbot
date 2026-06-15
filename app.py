@@ -704,7 +704,7 @@ st.markdown(
         padding: 0 !important;
     }
     [data-testid="stChatInput"] > div {
-        background: var(--panel) !important;
+        background: #1e1e1e;
         border: 1px solid var(--border-mid) !important;
         border-radius: var(--radius-lg) !important;
         padding: 0 !important;
@@ -895,6 +895,45 @@ st.markdown(
     .chat-scroll-zone {
         overflow-y: auto !important;
         min-height: 0 !important;
+    }
+    /* ── Force dark on Streamlit's bottom bar (light mode fix) ── */
+    [data-testid="stBottom"],
+    [data-testid="stBottom"] > div,
+    [data-testid="stBottom"] > div > div {
+        background-color: #0d0d0d !important;
+        border-color: #2a2a2a !important;
+    }
+
+    /* ── Force dark on chat input inner wrapper ── */
+    [data-testid="stChatInput"] > div {
+        background: #1e1e1e !important;
+        border: 1px solid #333333 !important;
+    }
+
+    /* ── White text + caret in textarea ── */
+    [data-testid="stChatInput"] textarea {
+        color: #ececec !important;
+        caret-color: #ececec !important;
+        -webkit-text-fill-color: #ececec !important;
+    }
+
+    /* ── Send button dark styling ── */
+    [data-testid="stChatInput"] button {
+        background: #262626 !important;
+        border-color: #333333 !important;
+    }
+    [data-testid="stChatInput"] button svg,
+    [data-testid="stChatInput"] button svg * {
+        fill: #ececec !important;
+        stroke: #ececec !important;
+    }
+
+    /* ── App-wide dark background override (beats light theme) ── */
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stMain"],
+    [data-testid="stAppViewBlockContainer"] {
+        background-color: #0d0d0d !important;
     }
     </style>
     """,
