@@ -695,7 +695,7 @@ st.markdown(
     .input-bar {
         flex: 0 0 auto;
         border-top: 1px solid var(--border);
-        background: var(--bg);
+        background: #1e1e1e;
         padding: 10px 20px 12px 20px;
     }
     [data-testid="stChatInput"] {
