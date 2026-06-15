@@ -976,6 +976,38 @@ st.markdown(
         background-color: #0d0d0d !important;
         color: #ececec !important;
     }
+    /* ===== FIX SEND BUTTON ICON + ALIGNMENT ===== */
+
+    /* Button container */
+    [data-testid="stChatInput"] button {
+        background-color: #10a37f !important;
+        border: none !important;
+        border-radius: 10px !important;
+        width: 42px !important;
+        height: 42px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+    }
+
+    /* 🔥 FORCE SVG visibility */
+    [data-testid="stChatInput"] button svg {
+        width: 18px !important;
+        height: 18px !important;
+        display: block !important;
+    }
+
+    /* 🔥 THIS IS THE REAL FIX */
+    [data-testid="stChatInput"] button svg path {
+        fill: white !important;
+        stroke: white !important;
+    }
+
+    /* hover */
+    [data-testid="stChatInput"] button:hover {
+        background-color: #0d7a60 !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
