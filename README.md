@@ -119,7 +119,7 @@ This avoids the two failure modes that plague RAG bots — answering anyway (hal
 
 | Type | Storage | Behavior |
 |---|---|---|
-| **Short-term** | `PostgresSaver` (checkpoints) | Full state per thread. Past 6 messages, older turns are summarized into a 3–4 sentence rolling summary and removed via `RemoveMessage`, keeping only the last 2 exchanges + summary in context |
+| **Short-term** | `PostgresSaver` (checkpoints) | Full state per thread. Past 6 messages, older turns are summarized into a 3–4 sentence rolling summary and removed via `RemoveMessage`, keeping only the last 2 exchanges + summary in context (due to input token limit ,for Groq-hosted LLM)|
 | **Long-term** | `PostgresStore` | A lightweight, Pydantic-parsed extraction call pulls durable facts (name, goals, risk profile, interests) per `user_id` and silently injects them into future prompts |
 
 <br>
