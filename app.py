@@ -972,6 +972,10 @@ st.markdown(
     [data-testid="stChatInput"] button:hover {
         background-color: #0d7a60 !important;
     }
+    html, body {
+        background-color: #0d0d0d !important;
+        color: #ececec !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
