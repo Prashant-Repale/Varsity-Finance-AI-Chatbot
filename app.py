@@ -935,6 +935,25 @@ st.markdown(
     [data-testid="stAppViewBlockContainer"] {
         background-color: #0d0d0d !important;
     }
+    /* FORCE dark input container (strong override) */
+    [data-testid="stChatInput"],
+    [data-testid="stChatInput"] > div,
+    [data-testid="stChatInput"] > div > div {
+        background-color: #1e1e1e !important;
+        color: #ececec !important;
+    }
+
+    /* FORCE textarea */
+    [data-testid="stChatInput"] textarea {
+        background-color: #1e1e1e !important;
+        color: #ffffff !important;
+        caret-color: #ffffff !important;
+    }
+
+    /* Placeholder fix */
+    [data-testid="stChatInput"] textarea::placeholder {
+        color: #888 !important;
+    }
     </style>
     """,
     unsafe_allow_html=True,
