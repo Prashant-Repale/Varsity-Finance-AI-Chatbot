@@ -31,7 +31,7 @@
 
 > Most finance chatbots either answer from frozen training data — and get prices wrong — or bolt one API onto a chat loop with no fallback logic. **Varsity Finance AI treats every query as a routing decision**: tool use is enforced (not suggested) by the system prompt, retrieval quality is validated before answering, and the agent manages its own context budget so long conversations don't blow past API rate limits.
 
-Built on a LangGraph `StateGraph`, grounded in the **17 Zerodha Varsity modules**, and traced end-to-end with **LangSmith**.
+Built on a LangGraph `StateGraph`, grounded in the **All 17 Zerodha Varsity modules**, and traced end-to-end with **LangSmith**.
 
 |  |  |
 |---|---|
