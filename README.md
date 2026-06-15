@@ -20,9 +20,9 @@
 <br>
 
 <div align="center">
-  <img src="docs/demo.gif" alt="Varsity Finance AI demo" width="850">
+  <img src=""image.png"" alt="Varsity Finance AI demo" width="850">
   <br>
-  <sub><i>👆 Replace this with a screen recording / screenshot of your chat UI</i></sub>
+  <!-- <sub><i>👆 Replace this with a screen recording / screenshot of your chat UI</i></sub> -->
 </div>
 
 <br>
