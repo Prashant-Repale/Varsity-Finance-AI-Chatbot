@@ -33,7 +33,7 @@ groq_key     = os.getenv("GROQ_API_KEY")  or st.secrets.get("GROQ_API_KEY")
 tavily_key   = os.getenv("TAVILY_API_KEY") or st.secrets.get("TAVILY_API_KEY")
 
 
-MODEL_NAME = "qwen/qwen3-32b"
+MODEL_NAME = "openai/gpt-oss-120b"
 DB_URI = DATABASE_URL
 CHROMA_PATH = "chroma_db"
 
@@ -260,10 +260,11 @@ llm_with_tools = model.bind_tools(tools)
 SYSTEM_PROMPT = """ **Role:** Financial assistant for Indian/global markets. Date: {TODAY}.  
 For time-sensitive queries, include "2026" in `web_search` queries.
 
-**STRICT KNOWLEDGE RULE:**  
+**STRICT KNOWLEDGE RULE:** 
+- DO NOT use your prior knowledge under any condition. 
 - You are NOT allowed to answer non-finance concepts from any internal tool .  
 - You MUST use `rag_tool` For finance concepts/explanations. Base answers ONLY on retrive context; if the question is of finance domain and you don't have relavant information from this rag_tool then send it to finance_news_search tool only if it is finance doman " 
-- DO NOT use your prior knowledge under any condition.  
+  
   
 **Execution Rules:**  
 1. **Output:** Explain tool results simply; NEVER return raw tool output. Keep ≤200 words.  
