@@ -297,7 +297,7 @@ would you like to ask :
 2.[Generate another relevant follow-up question]\n
 3.[Generate another relevant follow-up question]\n
 
-Source : [List unique useful source on a new line ]
+Source : [List unique useful source on a new line,also mention the tool used for example xyz tool ]
 
 **Disclaimer:** Append ONLY when the user asks for advice (e.g., "Should I invest in X?").
 For such queries, add:
