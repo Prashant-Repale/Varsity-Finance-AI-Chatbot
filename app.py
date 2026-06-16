@@ -719,25 +719,26 @@ st.markdown(
         font-size: var(--t-sm) !important;
     }
 
-    /* ── SEND BUTTON — the critical fix ──────────────────────────
-       Streamlit renders TWO states for the send button:
-         • Idle / has text  → shows an "arrow up" SVG (send icon)
-         • Processing       → shows a "square" SVG (stop icon)
-       Both must be styled consistently: green bg, white icon.
-       We use every selector variant Streamlit uses across versions.
-    ─────────────────────────────────────────────────────────────── */
+    /* ── SEND BUTTON — ChatGPT-style circle with white arrow ─────────────
+       Streamlit renders two SVG states in the button:
+         • Arrow-up SVG  → when textarea has text (send mode)
+         • Stop-square SVG → when idle / processing
+       We HIDE Streamlit's SVG entirely and inject our own white arrow
+       via a CSS ::after pseudo-element so it always looks correct.
+       Shape: green circle (#10a37f), white up-arrow, immune to theme.
+    ─────────────────────────────────────────────────────────────────── */
 
-    /* Container */
+    /* Button shell — perfect circle, green */
     [data-testid="stChatInput"] button,
     [data-testid="stChatInput"] [data-testid="stChatInputSubmitButton"],
     [data-testid="stChatInputSubmitButton"] {
         background-color: #10a37f !important;
         border: none !important;
-        border-radius: 10px !important;
-        width: 40px !important;
-        height: 40px !important;
-        min-width: 40px !important;
-        min-height: 40px !important;
+        border-radius: 50% !important;   /* ← circle, not rounded square */
+        width: 36px !important;
+        height: 36px !important;
+        min-width: 36px !important;
+        min-height: 36px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -746,14 +747,15 @@ st.markdown(
         flex-shrink: 0 !important;
         transition: background-color 0.15s ease !important;
         color-scheme: dark !important;
-        /* Kill any inherited light-mode filter */
         filter: none !important;
+        position: relative !important;
+        overflow: visible !important;
     }
 
     /* Hover */
     [data-testid="stChatInput"] button:hover,
     [data-testid="stChatInputSubmitButton"]:hover {
-        background-color: #0d7a60 !important;
+        background-color: #0d8f6f !important;
     }
 
     /* Active / pressed */
@@ -762,50 +764,42 @@ st.markdown(
         background-color: #0a5c49 !important;
     }
 
-    /* Disabled state (no text typed yet) */
+    /* Disabled — dim it */
     [data-testid="stChatInput"] button:disabled,
     [data-testid="stChatInputSubmitButton"]:disabled {
         background-color: #1e2e29 !important;
-        opacity: 0.5 !important;
+        opacity: 0.45 !important;
         cursor: not-allowed !important;
     }
 
-    /* ── SVG icon inside the button (both send arrow & stop square) ── */
+    /* ── HIDE Streamlit's SVG (stop square / arrow) — we draw our own ── */
     [data-testid="stChatInput"] button svg,
     [data-testid="stChatInputSubmitButton"] svg {
+        display: none !important;
+        visibility: hidden !important;
+        width: 0 !important;
+        height: 0 !important;
+    }
+
+    /* ── Inject white up-arrow via inline SVG background on ::before ──
+       This is a proper arrow-up icon (↑), always white, always centered,
+       completely independent of Streamlit's SVG state machine.          */
+    [data-testid="stChatInput"] button::before,
+    [data-testid="stChatInputSubmitButton"]::before {
+        content: '' !important;
+        display: block !important;
         width: 18px !important;
         height: 18px !important;
-        display: block !important;
         flex-shrink: 0 !important;
+        background-color: transparent !important;
+        /* Arrow-up SVG encoded inline — white, no fill on bg */
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='18' viewBox='0 0 24 24' fill='none' stroke='%23ffffff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='19' x2='12' y2='5'/%3E%3Cpolyline points='5 12 12 5 19 12'/%3E%3C/svg%3E") !important;
+        background-repeat: no-repeat !important;
+        background-position: center !important;
+        background-size: 18px 18px !important;
+        position: relative !important;
+        z-index: 2 !important;
     }
-
-    /* Force ALL svg elements white — covers path, rect, circle, polyline */
-    [data-testid="stChatInput"] button svg *,
-    [data-testid="stChatInputSubmitButton"] svg *,
-    [data-testid="stChatInput"] button svg path,
-    [data-testid="stChatInput"] button svg rect,
-    [data-testid="stChatInput"] button svg circle,
-    [data-testid="stChatInput"] button svg polyline,
-    [data-testid="stChatInput"] button svg line,
-    [data-testid="stChatInput"] button svg polygon {
-        fill: #ffffff !important;
-        stroke: #ffffff !important;
-        color: #ffffff !important;
-    }
-
-    /* Streamlit sometimes sets these as inline attributes — override them */
-    [data-testid="stChatInput"] button svg [fill],
-    [data-testid="stChatInputSubmitButton"] svg [fill] {
-        fill: #ffffff !important;
-    }
-    [data-testid="stChatInput"] button svg [stroke],
-    [data-testid="stChatInputSubmitButton"] svg [stroke] {
-        stroke: #ffffff !important;
-    }
-
-    /* ── JS-injected style anchor — the nuclear option.
-       A small <style> block injected by the JS below will override
-       any inline styles Streamlit sets on the button after render. ── */
 
     .thinking-dot {
         display: inline-block;
@@ -1085,32 +1079,39 @@ components.html(
         window.setInterval(enforceSidebarScroll, 800);
 
         // ── SEND BUTTON ENFORCER ─────────────────────────────────────────────
-        // Streamlit mutates button styles after every re-render.
-        // This MutationObserver watches the chat input area and re-applies
-        // our dark styling whenever Streamlit touches it.
+        // Streamlit re-renders and mutates the button after every rerun.
+        // Strategy: make the button a green circle, HIDE Streamlit's SVG
+        // (which flips between arrow and stop-square), and let CSS ::before
+        // draw a permanent white up-arrow via background-image instead.
         function enforceSendButton() {
             const btn = doc.querySelector('[data-testid="stChatInputSubmitButton"]')
                      || doc.querySelector('[data-testid="stChatInput"] button');
             if (!btn) return;
 
-            // Force button background
+            // ── Green circle shell ──
             btn.style.setProperty('background-color', '#10a37f', 'important');
             btn.style.setProperty('border', 'none', 'important');
-            btn.style.setProperty('border-radius', '10px', 'important');
-            btn.style.setProperty('width', '40px', 'important');
-            btn.style.setProperty('height', '40px', 'important');
+            btn.style.setProperty('border-radius', '50%', 'important');
+            btn.style.setProperty('width', '36px', 'important');
+            btn.style.setProperty('height', '36px', 'important');
+            btn.style.setProperty('min-width', '36px', 'important');
+            btn.style.setProperty('min-height', '36px', 'important');
             btn.style.setProperty('display', 'flex', 'important');
             btn.style.setProperty('align-items', 'center', 'important');
             btn.style.setProperty('justify-content', 'center', 'important');
             btn.style.setProperty('padding', '0', 'important');
             btn.style.setProperty('color-scheme', 'dark', 'important');
+            btn.style.setProperty('overflow', 'visible', 'important');
+            btn.style.setProperty('position', 'relative', 'important');
 
-            // Force all SVG children white
-            const svgEls = btn.querySelectorAll('svg, svg *');
-            svgEls.forEach(el => {
-                el.style.setProperty('fill', '#ffffff', 'important');
-                el.style.setProperty('stroke', '#ffffff', 'important');
-                el.style.setProperty('color', '#ffffff', 'important');
+            // ── Hide Streamlit's SVG (stop-square / arrow) completely ──
+            // CSS ::before pseudo-element draws the white arrow instead.
+            const svgEls = btn.querySelectorAll('svg');
+            svgEls.forEach(svg => {
+                svg.style.setProperty('display', 'none', 'important');
+                svg.style.setProperty('visibility', 'hidden', 'important');
+                svg.style.setProperty('width', '0', 'important');
+                svg.style.setProperty('height', '0', 'important');
             });
         }
 
