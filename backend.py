@@ -186,7 +186,7 @@ def finance_news_search(query: str) -> str:
         return f"Search failed: {str(e)}"
 
 
-tools = [rag_tool, get_stock_info, finance_news_search]
+tools = [rag_tool,get_stock_info,finance_news_search]
 llm_with_tools = model.bind_tools(tools)
 
 
