@@ -48,7 +48,7 @@ def load_llm():
     return ChatGroq(
         model=MODEL_NAME,
         temperature=0,
-        max_tokens=1000,
+        max_tokens=1000
     )
 
 # embeddings = HuggingFaceEmbeddings(
