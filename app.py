@@ -1370,30 +1370,77 @@ def uri_with_timeout(uri: str, seconds: int = 5) -> str:
     separator = "&" if "?" in uri else "?"
     return f"{uri}{separator}connect_timeout={seconds}"
 
+import psycopg
+from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
+
 @st.cache_resource(show_spinner=False)
 def get_runtime() -> dict[str, Any]:
-    import psycopg
     from langgraph.checkpoint.postgres import PostgresSaver
     from langgraph.store.postgres import PostgresStore
 
-    probe = psycopg.connect(uri_with_timeout(DB_URI))
-    probe.close()
+    pool = ConnectionPool(
+        conninfo=uri_with_timeout(DB_URI),
+        min_size=1,
+        max_size=5,
+        kwargs={
+            "autocommit": True,
+            "row_factory": dict_row,
+            "prepare_threshold": None,  # harmless now; required later if you ever switch to Neon's "-pooler" endpoint
+        },
+        check=ConnectionPool.check_connection,  # <- the actual fix: validates the conn on every checkout, transparently replaces it if Neon suspended it
+        max_idle=240,                           # recycle idle conns ~1 min before Neon's 5-min auto-suspend would kill them anyway
+        timeout=10,
+    )
+    pool.wait(timeout=10)  # fail fast with a clear error if Postgres is genuinely unreachable
 
-    checkpointer_cm = PostgresSaver.from_conn_string(DB_URI)
-    store_cm        = PostgresStore.from_conn_string(DB_URI)
-    checkpointer    = checkpointer_cm.__enter__()
-    store           = store_cm.__enter__()
-
+    checkpointer = PostgresSaver(pool)
+    store        = PostgresStore(pool)
     checkpointer.setup()
     store.setup()
 
     chatbot = build_chatbot(checkpointer=checkpointer, store=store)
     return {
-        "checkpointer_cm": checkpointer_cm,
-        "store_cm":        store_cm,
-        "checkpointer":    checkpointer,
-        "store":           store,
-        "chatbot":         chatbot,
+        "pool":         pool,
+        "checkpointer": checkpointer,
+        "store":        store,
+        "chatbot":      chatbot,
+    }
+import psycopg
+from psycopg.rows import dict_row
+from psycopg_pool import ConnectionPool
+
+@st.cache_resource(show_spinner=False)
+def get_runtime() -> dict[str, Any]:
+    from langgraph.checkpoint.postgres import PostgresSaver
+    from langgraph.store.postgres import PostgresStore
+
+    pool = ConnectionPool(
+        conninfo=uri_with_timeout(DB_URI),
+        min_size=1,
+        max_size=5,
+        kwargs={
+            "autocommit": True,
+            "row_factory": dict_row,
+            "prepare_threshold": None,  # harmless now; required later if you ever switch to Neon's "-pooler" endpoint
+        },
+        check=ConnectionPool.check_connection,  # <- the actual fix: validates the conn on every checkout, transparently replaces it if Neon suspended it
+        max_idle=240,                           # recycle idle conns ~1 min before Neon's 5-min auto-suspend would kill them anyway
+        timeout=10,
+    )
+    pool.wait(timeout=10)  # fail fast with a clear error if Postgres is genuinely unreachable
+
+    checkpointer = PostgresSaver(pool)
+    store        = PostgresStore(pool)
+    checkpointer.setup()
+    store.setup()
+
+    chatbot = build_chatbot(checkpointer=checkpointer, store=store)
+    return {
+        "pool":         pool,
+        "checkpointer": checkpointer,
+        "store":        store,
+        "chatbot":      chatbot,
     }
 
 def content_to_text(content: Any) -> str:
