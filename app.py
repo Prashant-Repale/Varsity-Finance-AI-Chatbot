@@ -1,8 +1,6 @@
 """
 Streamlit UI for the Agentic RAG Financial Chatbot.
 Premium ChatGPT/Codex-style design — no-scroll layout, Inter font, full viewport.
-
-
 """
 
 from __future__ import annotations
@@ -52,11 +50,23 @@ st.markdown(
         --user-bubble: #1a1a1a;
         --ai-bubble:   #111111;
 
-        /* ── Sidebar width is a CSS variable so JS can update it via
-           setProperty('--sidebar-width', ...) and override !important rules ── */
         --sidebar-width: 284px;
         --radius:    8px;
         --radius-lg: 12px;
+    }
+
+    /* ─── FORCE DARK EVERYWHERE — overrides system light mode ─── */
+    html, body,
+    .stApp,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    [data-testid="stMain"],
+    [data-testid="stBottom"],
+    [data-testid="stBottom"] > div,
+    [data-testid="stBottom"] > div > div {
+        background-color: #0d0d0d !important;
+        color: #ececec !important;
+        color-scheme: dark !important;
     }
 
     *, *::before, *::after { box-sizing: border-box; }
@@ -109,9 +119,6 @@ st.markdown(
         background: var(--bg) !important;
     }
 
-    /* ── Main content: flex column for header+messages+input layout.
-       padding-top: 2px prevents the header text from being clipped
-       at the top edge when overflow:hidden is active. ── */
     .main .block-container,
     [data-testid="stMain"] > div,
     [data-testid="stMain"] {
@@ -120,12 +127,9 @@ st.markdown(
         overflow-y: auto !important;
         padding: 0 !important;
         padding-top: 2px !important;
-        # display: flex !important;
         flex-direction: column !important;
     }
 
-    /* ── Sidebar width driven by CSS variable — JS updates --sidebar-width
-       to resize; using var() inside !important lets JS win via setProperty ── */
     section[data-testid="stSidebar"] {
         width:     var(--sidebar-width) !important;
         min-width: var(--sidebar-width) !important;
@@ -162,8 +166,6 @@ st.markdown(
         border-radius: 14px !important;
     }
 
-    /* ── stSidebarContent: overflow-y auto enables scrolling.
-       The old overflow:hidden was silently blocking all scroll. ── */
     [data-testid="stSidebarContent"] {
         height: 100% !important;
         overflow-y: auto !important;
@@ -187,22 +189,20 @@ st.markdown(
         color: var(--ink);
     }
 
-    /* When sidebar is OPEN */
-    body.sidebar-expanded 
-    [data-testid="stAppViewContainer"] 
-    [data-testid="stMain"] 
+    body.sidebar-expanded
+    [data-testid="stAppViewContainer"]
+    [data-testid="stMain"]
     .block-container {
         max-width: 1120px !important;
         margin-left: auto !important;
         margin-right: auto !important;
     }
 
-    /* When sidebar is CLOSED → true center */
-    body.sidebar-collapsed 
-    [data-testid="stAppViewContainer"] 
-    [data-testid="stMain"] 
+    body.sidebar-collapsed
+    [data-testid="stAppViewContainer"]
+    [data-testid="stMain"]
     .block-container {
-        max-width: 900px !important;   /* slightly tighter like ChatGPT */
+        max-width: 900px !important;
         margin-left: auto !important;
         margin-right: auto !important;
     }
@@ -224,17 +224,12 @@ st.markdown(
         margin-right: auto;
     }
 
-    /* ── FIX 1: Hide native Streamlit collapse button completely ──
-       The native button shows "keyboard_double_arrow_left" as raw text
-       when the Material Symbols font fails to load. We use our own
-       custom JS toggle button instead, so hide the native one entirely. */
     [data-testid="stSidebarCollapseButton"],
     [data-testid="stSidebarCollapseButton"] button {
         display: none !important;
         visibility: hidden !important;
     }
 
-    /* ── SIDEBAR TOGGLE BUTTON ── */
     [data-testid="baseButton-header"] {
         background: transparent !important;
         border:        none            !important;
@@ -317,7 +312,6 @@ st.markdown(
         fill: #ffffff !important; stroke: #ffffff !important;
     }
 
-    /* ── Sidebar: New Chat button ── */
     [data-testid="stSidebar"] .stButton:first-of-type > button {
         background: var(--panel) !important;
         border: 1px solid var(--border-mid) !important;
@@ -347,16 +341,6 @@ st.markdown(
         margin: 0;
     }
 
-    /* ══════════════════════════════════════════════════════════════════════
-       SIDEBAR THREAD BUTTONS — ChatGPT-style
-       Streamlit attaches data-testid="baseButton-primary" (active thread)
-       and data-testid="baseButton-secondary" (inactive thread) to the button
-       element itself. The old button[kind="primary"] selector was wrong and
-       never matched anything, causing the grey Streamlit default to bleed through.
-       We target both data-testid variants with high specificity here.
-       ══════════════════════════════════════════════════════════════════════ */
-
-    /* Base reset — every sidebar thread button */
     [data-testid="stSidebar"] [data-testid="baseButton-secondary"],
     [data-testid="stSidebar"] [data-testid="baseButton-primary"] {
         background:       transparent !important;
@@ -379,7 +363,6 @@ st.markdown(
         position:         relative    !important;
     }
 
-    /* Hover — both states */
     [data-testid="stSidebar"] [data-testid="baseButton-secondary"]:hover,
     [data-testid="stSidebar"] [data-testid="baseButton-primary"]:hover {
         background: rgba(255,255,255,0.06) !important;
@@ -388,7 +371,6 @@ st.markdown(
         box-shadow: none !important;
     }
 
-    /* Active thread — green left accent + slightly lit background + white text */
     [data-testid="stSidebar"] [data-testid="baseButton-primary"] {
         background:    rgba(255,255,255,0.08) !important;
         color:         var(--ink)            !important;
@@ -401,7 +383,6 @@ st.markdown(
         background: rgba(255,255,255,0.11) !important;
     }
 
-    /* ── FIX 2: Scrollable thread list — fixed max-height so it scrolls ── */
     .thread-scroll-area {
         flex: 1 1 auto;
         overflow-y: auto;
@@ -493,42 +474,28 @@ st.markdown(
         color: var(--ink) !important;
     }
 
-    /* Remove top space from main container */
     .block-container {
         padding-top: 0px !important;
     }
 
-    /* Also remove extra top spacing from main */
     [data-testid="stMain"] {
         padding-top: 0px !important;
     }
 
-    /* Remove extra bottom space in chat area */
     .chat-scroll-zone {
-        padding-bottom: 0px !important;
-        margin-bottom: 0px !important;
+        padding-bottom: 90px !important;
     }
-    /* Pull input bar closer to content */
-    .input-bar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        right: 0;
-    }   
 
-    /* Remove space created by last element */
     .chat-scroll-zone > *:last-child {
         margin-bottom: 0px !important;
     }
-    .chat-scroll-zone {
-    padding-bottom: 90px !important;  /* 🔥 match input height */
-}
-    }
+
     .main .block-container {
         display: flex;
         flex-direction: column;
-        justify-content: flex-end;   /* 🔥 THIS changes everything */
+        justify-content: flex-end;
     }
+
     .main-header {
         flex: 0 0 auto;
         display: flex;
@@ -536,7 +503,7 @@ st.markdown(
         align-items: center;
         padding: 0px 24px 6px 24px;
         border-bottom: 1px solid var(--border);
-        margin-top: -10px;
+        margin-top: 20px !important;
         background: var(--bg);
         transform: translateY(-6px);
     }
@@ -588,6 +555,7 @@ st.markdown(
         max-width: 100%;
         font-size: var(--t-md) !important;
         line-height: 1.7 !important;
+        background-color: transparent !important;
     }
     div[data-testid="stChatMessage"]:has([data-testid="chatAvatarIcon-user"]) {
         background: var(--user-bubble) !important;
@@ -692,42 +660,152 @@ st.markdown(
         margin-top: 3px;
     }
 
-    .input-bar {
-        flex: 0 0 auto;
-        border-top: 1px solid var(--border);
-        background: #1e1e1e;
-        padding: 10px 20px 12px 20px;
+    /* ══════════════════════════════════════════════════════════
+       CHAT INPUT BAR — fully dark, immune to system theme
+       ══════════════════════════════════════════════════════════ */
+
+    /* Bottom container that Streamlit wraps the chat input in */
+    [data-testid="stBottom"],
+    [data-testid="stBottom"] > div,
+    [data-testid="stBottom"] > div > div {
+        background-color: #0d0d0d !important;
+        border-color: #2a2a2a !important;
+        color-scheme: dark !important;
     }
+
+    /* The chat input root element */
     [data-testid="stChatInput"] {
         background: transparent !important;
         border: none !important;
         padding: 0 !important;
+        color-scheme: dark !important;
     }
-    [data-testid="stChatInput"] > div {
-        background: #1e1e1e;
-        border: 1px solid var(--border-mid) !important;
+
+    /* Inner wrapper — dark pill shape */
+    [data-testid="stChatInput"] > div,
+    [data-testid="stChatInput"] > div > div {
+        background-color: #1e1e1e !important;
+        border: 1px solid #333333 !important;
         border-radius: var(--radius-lg) !important;
-        padding: 0 !important;
-        transition: border-color 0.15s;
+        color-scheme: dark !important;
     }
+
+    /* Focus glow on the wrapper */
     [data-testid="stChatInput"] > div:focus-within {
         border-color: var(--accent) !important;
         box-shadow: 0 0 0 3px var(--accent-glow) !important;
     }
-    [data-testid="stChatInput"] textarea {
-        background: transparent !important;
-        color: var(--ink) !important;
+
+    /* Textarea itself */
+    [data-testid="stChatInput"] textarea,
+    [data-testid="stChatInput"] textarea:focus {
+        background-color: #1e1e1e !important;
+        color: #ececec !important;
+        caret-color: #ececec !important;
+        -webkit-text-fill-color: #ececec !important;
         font-size: var(--t-md) !important;
         font-family: 'Inter', sans-serif !important;
         border: none !important;
         resize: none;
         padding: 11px 16px !important;
         line-height: 1.5;
+        color-scheme: dark !important;
     }
+
+    /* Placeholder */
     [data-testid="stChatInput"] textarea::placeholder {
-        color: var(--ink-faint) !important;
+        color: #555555 !important;
+        -webkit-text-fill-color: #555555 !important;
         font-size: var(--t-sm) !important;
     }
+
+    /* ── SEND BUTTON — the critical fix ──────────────────────────
+       Streamlit renders TWO states for the send button:
+         • Idle / has text  → shows an "arrow up" SVG (send icon)
+         • Processing       → shows a "square" SVG (stop icon)
+       Both must be styled consistently: green bg, white icon.
+       We use every selector variant Streamlit uses across versions.
+    ─────────────────────────────────────────────────────────────── */
+
+    /* Container */
+    [data-testid="stChatInput"] button,
+    [data-testid="stChatInput"] [data-testid="stChatInputSubmitButton"],
+    [data-testid="stChatInputSubmitButton"] {
+        background-color: #10a37f !important;
+        border: none !important;
+        border-radius: 10px !important;
+        width: 40px !important;
+        height: 40px !important;
+        min-width: 40px !important;
+        min-height: 40px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        padding: 0 !important;
+        cursor: pointer !important;
+        flex-shrink: 0 !important;
+        transition: background-color 0.15s ease !important;
+        color-scheme: dark !important;
+        /* Kill any inherited light-mode filter */
+        filter: none !important;
+    }
+
+    /* Hover */
+    [data-testid="stChatInput"] button:hover,
+    [data-testid="stChatInputSubmitButton"]:hover {
+        background-color: #0d7a60 !important;
+    }
+
+    /* Active / pressed */
+    [data-testid="stChatInput"] button:active,
+    [data-testid="stChatInputSubmitButton"]:active {
+        background-color: #0a5c49 !important;
+    }
+
+    /* Disabled state (no text typed yet) */
+    [data-testid="stChatInput"] button:disabled,
+    [data-testid="stChatInputSubmitButton"]:disabled {
+        background-color: #1e2e29 !important;
+        opacity: 0.5 !important;
+        cursor: not-allowed !important;
+    }
+
+    /* ── SVG icon inside the button (both send arrow & stop square) ── */
+    [data-testid="stChatInput"] button svg,
+    [data-testid="stChatInputSubmitButton"] svg {
+        width: 18px !important;
+        height: 18px !important;
+        display: block !important;
+        flex-shrink: 0 !important;
+    }
+
+    /* Force ALL svg elements white — covers path, rect, circle, polyline */
+    [data-testid="stChatInput"] button svg *,
+    [data-testid="stChatInputSubmitButton"] svg *,
+    [data-testid="stChatInput"] button svg path,
+    [data-testid="stChatInput"] button svg rect,
+    [data-testid="stChatInput"] button svg circle,
+    [data-testid="stChatInput"] button svg polyline,
+    [data-testid="stChatInput"] button svg line,
+    [data-testid="stChatInput"] button svg polygon {
+        fill: #ffffff !important;
+        stroke: #ffffff !important;
+        color: #ffffff !important;
+    }
+
+    /* Streamlit sometimes sets these as inline attributes — override them */
+    [data-testid="stChatInput"] button svg [fill],
+    [data-testid="stChatInputSubmitButton"] svg [fill] {
+        fill: #ffffff !important;
+    }
+    [data-testid="stChatInput"] button svg [stroke],
+    [data-testid="stChatInputSubmitButton"] svg [stroke] {
+        stroke: #ffffff !important;
+    }
+
+    /* ── JS-injected style anchor — the nuclear option.
+       A small <style> block injected by the JS below will override
+       any inline styles Streamlit sets on the button after render. ── */
 
     .thinking-dot {
         display: inline-block;
@@ -791,7 +869,6 @@ st.markdown(
         width: 100% !important;
     }
 
-    /* FIX 3: Resize handle styling */
     #vf-resize-handle {
         position: absolute !important;
         right: -3px !important;
@@ -825,10 +902,10 @@ st.markdown(
     }
 
     .block-container,
-        [data-testid="stChatInput"],
-        div[data-testid="stChatMessage"] {
-            transition: all 0.2s ease;
-        }
+    [data-testid="stChatInput"],
+    div[data-testid="stChatMessage"] {
+        transition: all 0.2s ease;
+    }
 
     body.sidebar-collapsed .chat-scroll-zone {
         display: flex;
@@ -869,11 +946,12 @@ st.markdown(
         padding-left: 0 !important;
     }
 
-    /* ===== FINAL OVERRIDE FIX (DO NOT MODIFY ABOVE CSS) ===== */
-
+    /* ── Final baseline dark overrides (beats light theme system setting) ── */
     html, body {
         overflow-y: auto !important;
         height: auto !important;
+        background-color: #0d0d0d !important;
+        color: #ececec !important;
     }
 
     .stApp,
@@ -884,129 +962,12 @@ st.markdown(
         height: auto !important;
         min-height: 100vh !important;
         overflow: visible !important;
+        background-color: #0d0d0d !important;
     }
 
-    /* Prevent top clipping */
-    .main-header {
-        margin-top: 20px !important;
-    }
-
-    /* Ensure chat area never clips */
     .chat-scroll-zone {
         overflow-y: auto !important;
         min-height: 0 !important;
-    }
-    /* ── Force dark on Streamlit's bottom bar (light mode fix) ── */
-    [data-testid="stBottom"],
-    [data-testid="stBottom"] > div,
-    [data-testid="stBottom"] > div > div {
-        background-color: #0d0d0d !important;
-        border-color: #2a2a2a !important;
-    }
-
-    /* ── Force dark on chat input inner wrapper ── */
-    [data-testid="stChatInput"] > div {
-        background: #1e1e1e !important;
-        border: 1px solid #333333 !important;
-    }
-
-    /* ── White text + caret in textarea ── */
-    [data-testid="stChatInput"] textarea {
-        color: #ececec !important;
-        caret-color: #ececec !important;
-        -webkit-text-fill-color: #ececec !important;
-    }
-
-    /* ── Send button dark styling ── */
-    [data-testid="stChatInput"] button {
-        background: #262626 !important;
-        border-color: #333333 !important;
-    }
-    [data-testid="stChatInput"] button svg,
-    [data-testid="stChatInput"] button svg * {
-        fill: #ececec !important;
-        stroke: #ececec !important;
-    }
-
-    /* ── App-wide dark background override (beats light theme) ── */
-    .stApp,
-    [data-testid="stAppViewContainer"],
-    [data-testid="stMain"],
-    [data-testid="stAppViewBlockContainer"] {
-        background-color: #0d0d0d !important;
-    }
-    /* FORCE dark input container (strong override) */
-    [data-testid="stChatInput"],
-    [data-testid="stChatInput"] > div,
-    [data-testid="stChatInput"] > div > div {
-        background-color: #1e1e1e !important;
-        color: #ececec !important;
-    }
-
-    /* FORCE textarea */
-    [data-testid="stChatInput"] textarea {
-        background-color: #1e1e1e !important;
-        color: #ffffff !important;
-        caret-color: #ffffff !important;
-    }
-
-    /* Placeholder fix */
-    [data-testid="stChatInput"] textarea::placeholder {
-        color: #888 !important;
-    }
-    /* SEND BUTTON FIX */
-    [data-testid="stChatInput"] button {
-        background-color: #10a37f !important;   /* accent color */
-        border: none !important;
-        border-radius: 8px !important;
-    }
-
-    /* Icon inside button */
-    [data-testid="stChatInput"] button svg,
-    [data-testid="stChatInput"] button svg * {
-        fill: white !important;
-        stroke: white !important;
-    }
-
-    /* Hover effect */
-    [data-testid="stChatInput"] button:hover {
-        background-color: #0d7a60 !important;
-    }
-    html, body {
-        background-color: #0d0d0d !important;
-        color: #ececec !important;
-    }
-    /* ===== FIX SEND BUTTON ICON + ALIGNMENT ===== */
-
-    /* Button container */
-    [data-testid="stChatInput"] button {
-        background-color: #10a37f !important;
-        border: none !important;
-        border-radius: 10px !important;
-        width: 42px !important;
-        height: 42px !important;
-        display: flex !important;
-        align-items: center !important;
-        justify-content: center !important;
-        padding: 0 !important;
-    }
-
-    /* 🔥 FORCE SVG visibility */
-    [data-testid="stChatInput"] button svg {
-        width: 18px !important;
-        height: 18px !important;
-        display: block !important;
-    }
-
-    /* 🔥 THIS IS THE REAL FIX */
-    [data-testid="stChatInput"] button svg path {
-        fill: white !important;
-        stroke: white !important;
-    }
-
-    /* hover */
-    [data-testid="stChatInput"] button:hover {
-        background-color: #0d7a60 !important;
     }
     </style>
     """,
@@ -1030,6 +991,7 @@ components.html(
         }
 
         const doc = window.parent.document;
+
         // ── Custom sidebar toggle button ──────────────────────────────────────
         if (window.parent.__vfSidebarInterval) {
             window.parent.clearInterval(window.parent.__vfSidebarInterval);
@@ -1065,11 +1027,10 @@ components.html(
             button.style.background = "rgba(255,255,255,0.08)";
             button.style.color = "#ffffff";
         };
-
         button.onmouseleave = () => {
             button.style.background = "transparent";
             button.style.color = "#b3b3b3";
-};
+        };
 
         const isSidebarOpen = () => {
             const sidebar = doc.querySelector('[data-testid="stSidebar"]');
@@ -1112,9 +1073,7 @@ components.html(
         const observer = new MutationObserver(syncSidebarState);
         observer.observe(doc.body, { subtree: true, attributes: true, attributeFilter: ['aria-expanded'] });
 
-        // ── Reinforce sidebar scroll after every Streamlit re-render ──────────
-        // Streamlit may reset overflow on its containers after each rerun;
-        // this interval keeps the sidebar scrollable at all times.
+        // ── Reinforce sidebar scroll ──────────────────────────────────────────
         function enforceSidebarScroll() {
             const sc = doc.querySelector('[data-testid="stSidebarContent"]');
             if (sc && sc.style.overflowY !== 'auto') {
@@ -1125,18 +1084,101 @@ components.html(
         enforceSidebarScroll();
         window.setInterval(enforceSidebarScroll, 800);
 
-        // ── FIX 3: Drag-to-resize sidebar ────────────────────────────────────
-        // Hover the right edge of the sidebar to see the green resize indicator,
-        // then drag left/right. Min width: 180px, Max width: 520px.
+        // ── SEND BUTTON ENFORCER ─────────────────────────────────────────────
+        // Streamlit mutates button styles after every re-render.
+        // This MutationObserver watches the chat input area and re-applies
+        // our dark styling whenever Streamlit touches it.
+        function enforceSendButton() {
+            const btn = doc.querySelector('[data-testid="stChatInputSubmitButton"]')
+                     || doc.querySelector('[data-testid="stChatInput"] button');
+            if (!btn) return;
+
+            // Force button background
+            btn.style.setProperty('background-color', '#10a37f', 'important');
+            btn.style.setProperty('border', 'none', 'important');
+            btn.style.setProperty('border-radius', '10px', 'important');
+            btn.style.setProperty('width', '40px', 'important');
+            btn.style.setProperty('height', '40px', 'important');
+            btn.style.setProperty('display', 'flex', 'important');
+            btn.style.setProperty('align-items', 'center', 'important');
+            btn.style.setProperty('justify-content', 'center', 'important');
+            btn.style.setProperty('padding', '0', 'important');
+            btn.style.setProperty('color-scheme', 'dark', 'important');
+
+            // Force all SVG children white
+            const svgEls = btn.querySelectorAll('svg, svg *');
+            svgEls.forEach(el => {
+                el.style.setProperty('fill', '#ffffff', 'important');
+                el.style.setProperty('stroke', '#ffffff', 'important');
+                el.style.setProperty('color', '#ffffff', 'important');
+            });
+        }
+
+        // Run on interval + MutationObserver for instant reaction
+        window.setInterval(enforceSendButton, 500);
+        enforceSendButton();
+
+        const chatInputArea = doc.querySelector('[data-testid="stBottom"]')
+                           || doc.querySelector('[data-testid="stChatInput"]');
+        if (chatInputArea) {
+            const btnObserver = new MutationObserver(() => {
+                enforceSendButton();
+            });
+            btnObserver.observe(chatInputArea, {
+                subtree: true,
+                attributes: true,
+                childList: true,
+                attributeFilter: ['style', 'class']
+            });
+        } else {
+            // If not found yet, retry after DOM settles
+            window.setTimeout(() => {
+                const area = doc.querySelector('[data-testid="stBottom"]')
+                          || doc.querySelector('[data-testid="stChatInput"]');
+                if (area) {
+                    const btnObserver = new MutationObserver(enforceSendButton);
+                    btnObserver.observe(area, {
+                        subtree: true, attributes: true, childList: true,
+                        attributeFilter: ['style', 'class']
+                    });
+                }
+            }, 1500);
+        }
+
+        // ── Force dark on textarea + bottom bar after render ──────────────────
+        function enforceDarkInputs() {
+            const textarea = doc.querySelector('[data-testid="stChatInput"] textarea');
+            if (textarea) {
+                textarea.style.setProperty('background-color', '#1e1e1e', 'important');
+                textarea.style.setProperty('color', '#ececec', 'important');
+                textarea.style.setProperty('caret-color', '#ececec', 'important');
+                textarea.style.setProperty('-webkit-text-fill-color', '#ececec', 'important');
+                textarea.style.setProperty('color-scheme', 'dark', 'important');
+            }
+            const inputWrapper = doc.querySelector('[data-testid="stChatInput"] > div');
+            if (inputWrapper) {
+                inputWrapper.style.setProperty('background-color', '#1e1e1e', 'important');
+                inputWrapper.style.setProperty('border-color', '#333333', 'important');
+                inputWrapper.style.setProperty('color-scheme', 'dark', 'important');
+            }
+            const bottom = doc.querySelector('[data-testid="stBottom"]');
+            if (bottom) {
+                bottom.style.setProperty('background-color', '#0d0d0d', 'important');
+                bottom.style.setProperty('color-scheme', 'dark', 'important');
+            }
+        }
+        enforceDarkInputs();
+        window.setInterval(enforceDarkInputs, 600);
+
+        // ── Drag-to-resize sidebar ────────────────────────────────────────────
         (function attachResizeHandle() {
             const sidebar = doc.querySelector('section[data-testid="stSidebar"]');
             if (!sidebar) {
-                // Sidebar not mounted yet — retry in 400 ms
                 window.setTimeout(attachResizeHandle, 400);
                 return;
             }
 
-            if (doc.getElementById('vf-resize-handle')) return; // already attached
+            if (doc.getElementById('vf-resize-handle')) return;
 
             sidebar.style.position = 'relative';
 
@@ -1154,7 +1196,6 @@ components.html(
                 transition: 'background 0.15s',
             });
 
-            // Visual feedback on hover
             handle.addEventListener('mouseenter', () => {
                 if (!isResizing) handle.style.background = 'rgba(16,163,127,0.35)';
             });
@@ -1180,9 +1221,6 @@ components.html(
                 if (!isResizing) return;
                 const delta = e.clientX - startX;
                 const newW  = Math.min(Math.max(startWidth + delta, 180), 520);
-                // ── KEY FIX: update the CSS variable, NOT inline styles.
-                // Inline styles lose to CSS !important; CSS variables inside
-                // !important rules are resolved first, so setProperty wins. ──
                 doc.documentElement.style.setProperty('--sidebar-width', newW + 'px');
             });
 
@@ -1225,22 +1263,13 @@ def _clean_id(value: str | None, fallback: str) -> str:
     value = (value or "").strip()
     return value if value else fallback
 
-# def init_ids() -> None:
-#     if "user_id" not in st.session_state:
-#         st.session_state.user_id = _clean_id(_query_value("user_id"), _new_user_id())
-#     if "thread_id" not in st.session_state:
-#         st.session_state.thread_id = _clean_id(_query_value("thread_id"), _new_thread_id())
-#     sync_query_params()
-
 def init_ids() -> None:
     if "user_id" not in st.session_state:
         from_url = _clean_id(_query_value("user_id"), "")
         if from_url:
-            # Returning user — restore from URL
             st.session_state.user_id = from_url
             st.session_state.setup_done = True
         else:
-            # Brand new visitor — needs to enter name
             st.session_state.user_id = ""
             st.session_state.setup_done = False
 
@@ -1482,7 +1511,9 @@ if not st.session_state.get("setup_done", False):
                 st.rerun()
             else:
                 st.error("Please enter a username")
-    st.stop()   # ← blocks rest of app from rendering until name is set
+    st.stop()
+
+
 # ──────────────────────────────────────────────────────────────────────────────
 # SIDEBAR
 # ──────────────────────────────────────────────────────────────────────────────
@@ -1512,10 +1543,6 @@ with st.sidebar:
     # Recent chats section label
     st.markdown('<div class="sidebar-label">Recent</div>', unsafe_allow_html=True)
 
-    # Thread list — scrollability is handled by JS injecting overflow-y:auto
-    # on [data-testid="stSidebarContent"] and the CSS change from hidden to auto.
-    # st.markdown div wrappers do NOT wrap Streamlit buttons (each element gets
-    # its own container), so scroll must be driven by CSS/JS on the parent.
     user_threads = get_user_threads(st.session_state.user_id)
 
     if not user_threads:
@@ -1526,7 +1553,7 @@ with st.sidebar:
     else:
         for t in user_threads[:18]:
             is_active = (t["thread_id"] == st.session_state.thread_id)
-            label = (" ▶ " if is_active else " ") + t["title"]   # active state shown via CSS (green left border + bg)
+            label = (" ▶ " if is_active else " ") + t["title"]
             if st.button(
                 label,
                 key=f"thread_btn_{t['thread_id']}",
@@ -1638,17 +1665,17 @@ if db_ok and not thread_messages:
                 <div class="suggestion-card">
                     <span class="s-icon">📈</span>
                     <div class="s-text">Reliance stock price today?</div>
-                    <div class="s-sub">Live price & movement</div>
+                    <div class="s-sub">Live price &amp; movement</div>
                 </div>
                 <div class="suggestion-card">
                     <span class="s-icon">🧾</span>
                     <div class="s-text">Tax rules for market gains in India?</div>
-                    <div class="s-sub">Taxation & regulations</div>
+                    <div class="s-sub">Taxation &amp; regulations</div>
                 </div>
                 <div class="suggestion-card">
                     <span class="s-icon">🌐</span>
                     <div class="s-text">Find Nifty volatility latest news?</div>
-                    <div class="s-sub">Market news & volatility</div>
+                    <div class="s-sub">Market news &amp; volatility</div>
                 </div>
                 <div class="suggestion-card">
                     <span class="s-icon">🎯</span>
