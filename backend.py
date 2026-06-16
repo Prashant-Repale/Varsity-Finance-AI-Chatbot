@@ -116,7 +116,7 @@ def rag_tool(query: str) -> dict:
     if not relevance_check or relevance_check[0][1] < 0.1:
         return {
             "status": "not found ",
-            "instruction": "If no relevant documents are found, use finance_news_search only for finance-related queries; otherwise, do not use any tools and politely respond that only finance-related questions are supported.",
+            "instruction": "If no relevant documents are found, use finance_news_search tool only for finance-related queries; otherwise, do not use any tools and politely respond that only finance-related questions are supported.",
             "context": [],
         }
     context = [doc.page_content for doc in results]
