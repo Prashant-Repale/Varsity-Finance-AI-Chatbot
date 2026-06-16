@@ -33,7 +33,7 @@ groq_key     = os.getenv("GROQ_API_KEY")  or st.secrets.get("GROQ_API_KEY")
 tavily_key   = os.getenv("TAVILY_API_KEY") or st.secrets.get("TAVILY_API_KEY")
 
 
-MODEL_NAME = "openai/gpt-oss-120b"
+MODEL_NAME = "qwen/qwen3-32b"
 DB_URI = DATABASE_URL
 CHROMA_PATH = "chroma_db"
 
