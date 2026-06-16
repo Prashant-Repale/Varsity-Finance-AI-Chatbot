@@ -116,7 +116,7 @@ def rag_tool(query: str) -> dict:
     if not relevance_check or relevance_check[0][1] < 0.1:
         return {
             "status": "not found ",
-            "instruction": "If no relevant documents are found, use web_search only for finance-related queries; otherwise, do not use any tools and politely respond that only finance-related questions are supported.",
+            "instruction": "If no relevant documents are found, use finance_news_search only for finance-related queries; otherwise, do not use any tools and politely respond that only finance-related questions are supported.",
             "context": [],
         }
     context = [doc.page_content for doc in results]
@@ -158,7 +158,7 @@ def get_stock_info(ticker: str) -> dict:
 from tavily import TavilyClient
 TODAY = datetime.now().strftime("%B %d, %Y")
 @tool
-def web_search(query: str) -> str:
+def finance_news_search(query: str) -> str:
     """
     Use this tool for recent news, latest events, current market updates,
     recent company announcements, or any information that needs the internet, todays date is { TODAY}.
@@ -186,7 +186,7 @@ def web_search(query: str) -> str:
         return f"Search failed: {str(e)}"
 
 
-tools = [rag_tool, get_stock_info, web_search]
+tools = [rag_tool, get_stock_info, finance_news_search]
 llm_with_tools = model.bind_tools(tools)
 
 
@@ -277,7 +277,7 @@ For time-sensitive queries, include "2026" in `web_search` queries.
 **Tool Routing (Finance queries MUST use a tool first):**  
 - `rag_tool`: For finance concepts/explanations. Base answers ONLY on retrieved context , if the question is of finance domain and you dont have relavant information from this tool then send it to web search tool only if it is finance doman , if question is out of the finance doman Use NO tools say polietly.  
 - `get_stock_info`: For live prices, indices, P/E, market cap, 52‑wk high/low. NEVER use `web_search` for these.  
-- `web_search`: For recent news/events.  
+- `finance_news_search`: For recent news/events.  
 - *Non-finance queries:* Use NO tools; politely state it is outside your domain.  
 
 **MANDATORY ENDING (STRICT FORMAT):**  
