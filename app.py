@@ -432,24 +432,64 @@ st.markdown(
         margin: 8px 0;
     }
 
+    /* ── Sidebar text input — thin gray border, ChatGPT style ──
+       Streamlit wraps <input> in several divs, each of which can
+       independently get a border from the default theme. We target
+       every layer to guarantee only one thin #333 border shows.    */
+
+    /* The outermost stTextInput container */
+    [data-testid="stSidebar"] .stTextInput {
+        margin-bottom: 4px !important;
+    }
+
+    /* Root element wrapper — kills Streamlit's default thick ring */
+    [data-testid="stSidebar"] [data-testid="stTextInputRootElement"],
+    [data-testid="stSidebar"] [data-baseweb="input"],
+    [data-testid="stSidebar"] [data-baseweb="base-input"] {
+        background: #1a1a1a !important;
+        border: 1px solid #333333 !important;
+        border-radius: 6px !important;
+        box-shadow: none !important;
+        outline: none !important;
+        transition: border-color 0.15s !important;
+    }
+
+    /* Hover — slight brightening like ChatGPT */
+    [data-testid="stSidebar"] [data-testid="stTextInputRootElement"]:hover,
+    [data-testid="stSidebar"] [data-baseweb="input"]:hover,
+    [data-testid="stSidebar"] [data-baseweb="base-input"]:hover {
+        border-color: #4a4a4a !important;
+    }
+
+    /* Focus — accent green, no glow ring */
+    [data-testid="stSidebar"] [data-testid="stTextInputRootElement"]:focus-within,
+    [data-testid="stSidebar"] [data-baseweb="input"]:focus-within,
+    [data-testid="stSidebar"] [data-baseweb="base-input"]:focus-within {
+        border-color: var(--accent) !important;
+        box-shadow: none !important;
+    }
+
+    /* The actual <input> element — no border of its own */
     [data-testid="stSidebar"] input {
-        background: var(--panel) !important;
-        border: 1px solid var(--border-mid) !important;
+        background: transparent !important;
+        border: none !important;
+        box-shadow: none !important;
+        outline: none !important;
         color: var(--ink) !important;
         font-size: var(--t-sm) !important;
-        border-radius: 6px !important;
+        font-family: 'Inter', sans-serif !important;
         height: 32px !important;
         padding: 0 10px !important;
+        caret-color: var(--ink) !important;
+        -webkit-text-fill-color: var(--ink) !important;
     }
+
     [data-testid="stSidebar"] label {
         font-size: var(--t-xs) !important;
         color: var(--ink-faint) !important;
         font-weight: 500 !important;
         text-transform: uppercase;
         letter-spacing: 0.05em;
-    }
-    [data-testid="stSidebar"] .stTextInput {
-        margin-bottom: 4px;
     }
 
     .session-date {
@@ -1146,8 +1186,9 @@ components.html(
             }, 1500);
         }
 
-        // ── Force dark on textarea + bottom bar after render ──────────────────
+        // ── Force dark on textarea + bottom bar + sidebar inputs after render ──
         function enforceDarkInputs() {
+            // Chat textarea
             const textarea = doc.querySelector('[data-testid="stChatInput"] textarea');
             if (textarea) {
                 textarea.style.setProperty('background-color', '#1e1e1e', 'important');
@@ -1167,6 +1208,35 @@ components.html(
                 bottom.style.setProperty('background-color', '#0d0d0d', 'important');
                 bottom.style.setProperty('color-scheme', 'dark', 'important');
             }
+
+            // ── Sidebar User ID input — kill the thick white border ──
+            // Target every wrapper layer Streamlit uses for st.text_input
+            const sidebarInputWrappers = doc.querySelectorAll(
+                '[data-testid="stSidebar"] [data-baseweb="input"],' +
+                '[data-testid="stSidebar"] [data-baseweb="base-input"],' +
+                '[data-testid="stSidebar"] [data-testid="stTextInputRootElement"]'
+            );
+            sidebarInputWrappers.forEach(el => {
+                el.style.setProperty('background-color', '#1a1a1a', 'important');
+                el.style.setProperty('border', '1px solid #333333', 'important');
+                el.style.setProperty('border-radius', '6px', 'important');
+                el.style.setProperty('box-shadow', 'none', 'important');
+                el.style.setProperty('outline', 'none', 'important');
+                el.style.setProperty('color-scheme', 'dark', 'important');
+            });
+            // The actual <input> inside — no border, transparent bg
+            const sidebarInputs = doc.querySelectorAll(
+                '[data-testid="stSidebar"] input'
+            );
+            sidebarInputs.forEach(inp => {
+                inp.style.setProperty('background', 'transparent', 'important');
+                inp.style.setProperty('border', 'none', 'important');
+                inp.style.setProperty('box-shadow', 'none', 'important');
+                inp.style.setProperty('outline', 'none', 'important');
+                inp.style.setProperty('color', '#ececec', 'important');
+                inp.style.setProperty('-webkit-text-fill-color', '#ececec', 'important');
+                inp.style.setProperty('color-scheme', 'dark', 'important');
+            });
         }
         enforceDarkInputs();
         window.setInterval(enforceDarkInputs, 600);
