@@ -42,7 +42,7 @@ CHROMA_PATH = "chroma_db"
 #     temperature=0,
 #     max_tokens=1024,
 # )
-# 🔹 CACHE LLM (optional but good)
+# 🔹 CACHE LLM 
 @st.cache_resource
 def load_llm():
     return ChatGroq(
@@ -55,7 +55,7 @@ def load_llm():
 #     model_name="sentence-transformers/all-MiniLM-L6-v2",
 #     model_kwargs={"device": "cpu"},
 # )
-# 🔹 CACHE EMBEDDINGS (IMPORTANT)
+# 🔹 CACHE EMBEDDINGS
 @st.cache_resource
 def load_embeddings():
     return HuggingFaceEmbeddings(
@@ -68,7 +68,7 @@ def load_embeddings():
 #     embedding_function=embeddings,
 # )
 
-# 🔹 CACHE VECTOR DB (IMPORTANT)
+# 🔹 CACHE VECTOR DB 
 @st.cache_resource
 def load_vector_db(_embeddings):
     return Chroma(
@@ -85,7 +85,7 @@ def load_vector_db(_embeddings):
 #     },
 # )
 
-# 🔹 CACHE RETRIEVER (IMPORTANT)
+# 🔹 CACHE RETRIEVER 
 @st.cache_resource
 def load_retriever(_db):
     return _db.as_retriever(
@@ -115,14 +115,7 @@ def rag_tool(query: str) -> dict:
     """
     
     results = retriever.invoke(query)
-    # relevance_check = db.similarity_search_with_relevance_scores(query, k=1)
-
-    # if not relevance_check or relevance_check[0][1] < 0.1:
-    #     return {
-    #         # "status": 
-    #         "instruction": "If no relevant documents are found, use finance_news_search tool only for finance-related queries; otherwise, do not use any tools and politely respond that only finance-related questions are supported.",
-    #         "context": [],
-    #     }
+    
     context = [doc.page_content for doc in results]
     metadata = [doc.metadata for doc in results]
     return {"query": query, "context": "\n\n".join(context), "metadata": metadata}
@@ -301,7 +294,7 @@ Source : [List unique useful source on a new line,also mention the tool used for
 
 **Disclaimer:** Append ONLY when the user asks for advice (e.g., "Should I invest in X?").
 For such queries, add:
-"⚠️ This is for educational purposes only and not financial advice."
+" This is for educational purposes only and not financial advice."
 """
 class FactExtraction(BaseModel):
     has_new_fact: bool = Field(description="Whether the message contains a stable user fact worth storing")
@@ -324,7 +317,7 @@ def _extract_json_object(text: str) -> str:
 
 
 def chat_node(state: ChatState, config: RunnableConfig, store: BaseStore):
-    # ALWAYS start fresh with your master system prompt (The Rulebook)
+    
     messages = [SystemMessage(content=SYSTEM_PROMPT)]
 
     # =========================================================================
@@ -332,17 +325,17 @@ def chat_node(state: ChatState, config: RunnableConfig, store: BaseStore):
     # =========================================================================
     user_id = config["configurable"].get("user_id")
     if user_id:
-        # Search the database for this specific user's saved facts
+       
         namespace = (user_id, "personal_facts")
-        # stored_memories = store.search(namespace)
+       
         stored_memories = list(store.search(namespace))
 
         if stored_memories:
-            # Format the database rows into clean bullet points
+            
             facts_list = [f"• [{item.key}]: {item.value['fact']}" for item in stored_memories]
             compiled_facts = "\n".join(facts_list)
 
-            # Inject it silently as a system instruction
+            
             long_term_prompt = (
                 "--- PERSISTENT USER PROFILE INFO ---\n"
                 f"{compiled_facts}\n"
@@ -360,7 +353,7 @@ def chat_node(state: ChatState, config: RunnableConfig, store: BaseStore):
     # =========================================================================
     # 3. BUILD AND INVOKE
     # =========================================================================
-    # Extend with the active messages currently stored in the state
+    
     
     messages.extend(state["messages"])
     response = llm_with_tools.invoke(messages)
@@ -381,7 +374,7 @@ def memory_summarize_delete(state: ChatState, config: RunnableConfig, store: Bas
     if not msgs:
         return {}
 
-    # 🔥 CLEAN MESSAGES
+    #  CLEAN MESSAGES
     clean_msgs = filter_clean_messages(msgs)
 
     # =========================================================================
@@ -394,7 +387,7 @@ def memory_summarize_delete(state: ChatState, config: RunnableConfig, store: Bas
             break
 
     if latest_user_message:
-        # 2. Define the prompt template with input variables
+        
         parser = PydanticOutputParser(pydantic_object=FactExtraction)
 
         prompt_template = PromptTemplate(
@@ -407,7 +400,7 @@ def memory_summarize_delete(state: ChatState, config: RunnableConfig, store: Bas
         )
 
         try:
-            # 4. Invoke the model, then parse the JSON object even if the model emits thinking text.
+            
             extraction_response = (prompt_template | model).invoke({"user_message": latest_user_message})
             extraction_text = getattr(extraction_response, "content", str(extraction_response))
             fact_result = parser.parse(_extract_json_object(extraction_text))
@@ -416,10 +409,10 @@ def memory_summarize_delete(state: ChatState, config: RunnableConfig, store: Bas
                 user_id = config["configurable"].get("user_id")
                 if user_id:
                     store.put((user_id, "personal_facts"), fact_result.category, {"fact": fact_result.fact})
-                    # print(f"📦 [LONG-TERM MEMORY] Saved to key '{fact_result.category}': {fact_result.fact}")
+                    
 
         except Exception as e:
-            # General fallback to keep the chat running safely if formatting fails
+            
             print(f"Long-term memory extraction skipped: {repr(e)}")
     if len(msgs) > 6:
         existing_summary = state.get("summary", "")
@@ -437,17 +430,16 @@ def memory_summarize_delete(state: ChatState, config: RunnableConfig, store: Bas
         response = model.invoke(messages_for_summary)
         new_summary = response.content
 
-        # STRATEGY: Delete everything EXCEPT the last 4 messages (2 full chat turns)
-        # This keeps the immediate context completely intact so the bot doesn't feel jumpy
+        
         messages_to_delete = msgs[:-4]
 
-        # Return BOTH updates simultaneously to the LangGraph state
+        
         return {
             "summary": new_summary,
             "messages": [RemoveMessage(id=m.id) for m in messages_to_delete],
         }
 
-    # If messages are less than 10, do absolutely nothing and let the graph finish
+    
     return {}
 
 
@@ -457,14 +449,13 @@ graph.add_node("chat_node", chat_node)
 graph.add_node("tools", tool_node)
 graph.add_node("memory_node", memory_summarize_delete)
 
-# 1. The entry point stays the same
+
 graph.add_edge(START, "chat_node")
-# 2. THE FIX: We map the condition.
-# If tools -> go to tools. If END -> go to clean_up instead!
+
 graph.add_conditional_edges("chat_node", tools_condition, {"tools": "tools", "__end__": "memory_node"})
-# 3. Tools loop back to chat as normal
+
 graph.add_edge("tools", "chat_node")
-# 4. THE FINISH LINE: After cleanup finishes, we officially end the turn
+
 graph.add_edge("memory_node", END)
 
 
@@ -496,22 +487,22 @@ if __name__ == "__main__":
     print(welcome_message)
 
     with PostgresSaver.from_conn_string(DB_URI) as checkpointer, PostgresStore.from_conn_string(DB_URI) as store:
-        # 3. Setup BOTH tables in your database
+        
         checkpointer.setup()
         store.setup()
 
-        # 4. Compile the graph with BOTH memory systems
+        
         chatbot = build_chatbot(checkpointer, store)
 
-        # We now track BOTH the specific conversation (thread) AND the user (user_id)
+        
         config = {
             "configurable": {
                 "thread_id": "varsity_session_2026_01",
-                "user_id": "student_001",  # This links to the Long-Term Store
+                "user_id": "student_001",  
             }
         }
 
-        print("⚡ Connected to Postgres (Checkpointer + Store). Ready!")
+        print(" Connected to Postgres (Checkpointer + Store). Ready!")
 
         while True:
             user_input = input("\nYou: ").strip()
